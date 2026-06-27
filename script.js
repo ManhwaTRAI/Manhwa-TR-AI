@@ -1,11 +1,10 @@
-const button = document.querySelector("button");
-const fileInput = document.querySelector("input[type='file']");
+document.querySelector("button").addEventListener("click", () => {
+    const file = document.querySelector("input[type='file']").files[0];
 
-button.addEventListener("click", () => {
-    if (!fileInput.files.length) {
-        alert("Lütfen bir resim seç.");
+    if (!file) {
+        alert("Lütfen bir dosya seç.");
         return;
     }
 
-    alert("Çeviri sistemi yakında eklenecek!");
+    alert("Dosya seçildi: " + file.name);
 });
