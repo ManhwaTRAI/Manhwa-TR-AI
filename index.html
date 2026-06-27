@@ -5,14 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManhwaTR AI</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
-<h1>ManhwaTR AI</h1>
-<p>Yapay zekâ destekli manhwa çeviri platformu.</p>
+    <h1>ManhwaTR AI</h1>
+    <p>Yapay zekâ destekli manhwa çeviri platformu</p>
 
-<input type="file">
-<button>Çevir</button>
-<script src="script.js"></script>
+    <div class="upload-section">
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="translateBtn">Çevir</button>
+    </div>
+
+    <div class="preview-section">
+        <img id="imagePreview" src="" alt="Yüklenen Manhwa Sayfası" style="max-width: 100%; display: none; margin-top: 20px; border-radius: 8px;">
+    </div>
+
+    <div class="result-section" style="margin-top: 20px;">
+        <h3 id="statusText"></h3>
+        <div id="ocrResult" style="white-space: pre-wrap; background: #222; color: #fff; padding: 10px; border-radius: 5px; display: none;"></div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const translateBtn = document.getElementById('translateBtn');
+        const statusText = document.getElementById('statusText');
+        const ocrResult = document.getElementById('ocrResult');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                    statusText.innerText = "Resim yüklendi. Çevir butonuna basabilirsiniz.";
+                    ocrResult.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        translateBtn.addEventListener('click', async () => {
+            if (!imageInput.files[0]) {
+                alert("Lütfen önce bir manhwa görseli yükleyin!");
+                return;
+            }
+
+            statusText.innerText = "Görseldeki metinler taranıyor (OCR)... Lütfen bekleyin.";
+            ocrResult.style.display = 'none';
+
+            try {
+                const result = await Tesseract.recognize(
+                    imageInput.files[0],
+                    'eng+kor', 
+                    { logger: m => console.log(m) }
+                );
+
+                const detectedText = result.data.text;
+                
+                if (!detectedText.trim()) {
+                    statusText.innerText = "Görselde herhangi bir metin bulunamadı.";
+                    return;
+                }
+
+                statusText.innerText = "Metin başarıyla okundu! Türkçe'ye çevriliyor...";
+                ocrResult.innerText = "Okunan Orijinal Metin:\n" + detectedText;
+                ocrResult.style.display = 'block';
+
+                const turkishText = await translateToTurkish(detectedText);
+                
+                statusText.innerText = "Çeviri Tamamlandı!";
+                ocrResult.innerText += "\n\n--- Türkçe Çeviri ---\n" + turkishText;
+
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Bir hata oluştu: " + error.message;
+            }
+        });
+
+        async function translateToTurkish(text) {
+            return "[Yapay Zeka Çevirisi]: " + text + " (Bu metin yakında yapay zeka API'si ile tamamen Türkçe'ye çevrilecek.)";
+        }
+    </script>
 </body>
 </html>
