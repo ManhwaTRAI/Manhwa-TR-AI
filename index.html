@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManhwaTR AI</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+    <script src="https://unpkg.com/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -47,42 +47,41 @@
             }
         });
 
-        translateBtn.addEventListener('click', async () => {
+        translateBtn.addEventListener('click', () => {
             if (!imageInput.files[0]) {
                 alert("Lütfen önce bir manhwa görseli yükleyin!");
                 return;
             }
 
-            statusText.innerText = "Görsel taranıyor... (İlk tarama 10-15 saniye sürebilir)";
+            statusText.innerText = "Görsel taranıyor... Lütfen bekleyin.";
             ocrResult.style.display = 'none';
 
-            try {
-                const result = await Tesseract.recognize(
-                    imageInput.files[0],
-                    'eng',
-                    { logger: m => console.log(m.status, m.progress) }
-                );
-
-                const detectedText = result.data.text;
+            // Kilitlenmeyi önleyen en sade Tesseract tetikleme fonksiyonu
+            Tesseract.recognize(
+                imageInput.files[0],
+                'eng',
+                { logger: m => { statusText.innerText = "Tarama Durumu: " + m.status + " (" + Math.round(m.progress * 100) + "%)"; } }
+            ).then(({ data: { text } }) => {
                 
-                if (!detectedText || !detectedText.trim()) {
-                    statusText.innerText = "Görselde okunabilir bir metin bulunamadı. Lütfen yazının net olduğu bir resim deneyin.";
+                if (!text || !text.trim()) {
+                    statusText.innerText = "Görselde okunabilir bir metin bulunamadı.";
                     return;
                 }
 
-                statusText.innerText = "Metin başarıyla okundu! Türkçe'ye çevriliyor...";
-                ocrResult.innerText = "Okunan Orijinal Metin:\n" + detectedText;
+                statusText.innerText = "Metin okundu! Türkçe'ye çevriliyor...";
+                ocrResult.innerText = "Okunan Orijinal Metin:\n" + text;
                 ocrResult.style.display = 'block';
 
-                const turkishText = await translateToTurkish(detectedText);
-                
-                statusText.innerText = "Çeviri Tamamlandı!";
-                ocrResult.innerText += "\n\n--- Türkçe Çeviri ---\n" + turkishText;
+                // Çeviriye gönderiyoruz
+                translateToTurkish(text).then(turkishText => {
+                    statusText.innerText = "Çeviri Tamamlandı!";
+                    ocrResult.innerText += "\n\n--- Türkçe Çeviri ---\n" + turkishText;
+                });
 
-            } catch (error) {
+            }).catch(error => {
                 console.error(error);
                 statusText.innerText = "Tarama sırasında bir hata oluştu: " + error.message;
-            }
+            });
         });
 
         async function translateToTurkish(text) {
@@ -92,7 +91,7 @@
                 if (data.responseData && data.responseData.translatedText) {
                     return data.responseData.translatedText;
                 } else {
-                    return "Çeviri servisi yoğun, lütfen tekrar deneyin.";
+                    return "Çeviri servisi yanıt vermedi.";
                 }
             } catch (error) {
                 console.error("Çeviri Hatası:", error);
