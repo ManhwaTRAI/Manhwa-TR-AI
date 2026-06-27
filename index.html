@@ -5,7 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManhwaTR AI</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+    <<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ManhwaTR AI</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Tesseract v4 Stabil Tarayıcı Sürümü -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.3/dist/tesseract.min.js"></script>
+</head>
+<body>
+
+    <h1>ManhwaTR AI</h1>
+    <p>Yapay zekâ destekli manhwa çeviri platformu.</p>
+
+    <div class="upload-section">
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="translateBtn">Çevir</button>
+    </div>
+
+    <div class="preview-section" style="margin-top: 20px;">
+        <img id="imagePreview" src="" alt="Önizleme" style="max-width: 100%; display: none; margin-bottom: 10px;">
+    </div>
+
+    <div class="result-section" style="margin-top: 20px;">
+        <h3 id="statusText"></h3>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
 </head>
 <body>
 
