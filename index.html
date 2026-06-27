@@ -85,7 +85,25 @@
             }
         });
 
+                // 4. Gerçek ve Ücretsiz Çeviri Fonksiyonu (MyMemory API Entegrasyonu)
         async function translateToTurkish(text) {
+            try {
+                // Tesseract korece okuduysa 'ko|tr', ingilizce okuduysa 'en|tr' olarak otomatik ayarlanabilir.
+                // Şimdilik genel olarak İngilizce/Korece karışık algılama için otomatik kaynak (autodetect) veya 'en|tr' kullanıyoruz.
+                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|tr`);
+                const data = await response.json();
+                
+                if (data.responseData && data.responseData.translatedText) {
+                    return data.responseData.translatedText;
+                } else {
+                    return "Çeviri servisi yanıt vermedi.";
+                }
+            } catch (error) {
+                console.error("Çeviri Hatası:", error);
+                return "Çeviri yapılırken teknik bir hata oluştu.";
+            }
+        }
+        
             return "[Yapay Zeka Çevirisi]: " + text + " (Bu metin yakında yapay zeka API'si ile tamamen Türkçe'ye çevrilecek.)";
         }
     </script>
